@@ -15,7 +15,7 @@ process METASCOPE {
     val db_path
 
     output:
-    tuple val(meta), path("${meta.id}*"), emit: results
+    tuple val(meta), path("${prefix}*"), emit: results
 
     script:
     def read1  = reads[0]

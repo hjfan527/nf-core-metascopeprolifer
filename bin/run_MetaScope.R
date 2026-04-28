@@ -7,9 +7,9 @@ indexDir       <- args[3]
 expTag         <- args[4]
 outDir         <- args[5]
 tmpDir         <- args[6]
-threads        <- args[7]
+threads        <- as.integer(args[7])
 targets        <- stringr::str_split(args[8], ",")[[1]]
-filters        <- if (!is.na(args[9]) && args[9] != "NULL" && args[9] != "") stringr::str_split(args[9], ",")[[1]] else NULL
+filters        <- if (!is.na(args[9]) && tolower(args[9]) != "null" && args[9] != "") stringr::str_split(args[9], ",")[[1]] else NULL
 accession_path <- args[10]
 db_path        <- args[11]
 
@@ -36,12 +36,12 @@ target_map <- align_target_bowtie(read1 = readPath1,
                                   align_file = expTag,
                                   overwrite = TRUE,
                                   threads = threads,
-                                  bowtie2_options = paste(bt2_params, "-f"),
+                                  bowtie2_options = bt2_params,
                                   quiet = FALSE)
 
 # Align to filters
 if (!is.null(filters)) {
-    output <- paste(paste0(tmpDir, expTag), "filtered", sep = ".")
+    output <- paste(file.path(tmpDir, expTag), "filtered", sep = ".")
     final_map <- filter_host_bowtie(reads_bam = target_map,
                                     lib_dir = indexDir,
                                     libs = filters_,
@@ -54,8 +54,9 @@ if (!is.null(filters)) {
 }
 
 # MetaScope ID
+id_input <- if (!is.null(filters)) final_map else target_map
 metascope_id_path <- metascope_id(
-             target_map, input_type = "bam", aligner = "bowtie2",
+             id_input, input_type = "bam", aligner = "bowtie2",
              accession_path  = accession_path,
              db = "ncbi",
              priors_df = NULL,
